@@ -1,73 +1,64 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
-public class MaxProfit {
-
-    static class Building {
-        String name;
-        int time;
-        int earnings;
-        Building(String name, int time, int earnings) {
-            this.name = name;
-            this.time = time;
-            this.earnings = earnings;
+public class Main {
+    static class Solution {
+        int t, p, c;
+        Solution(int t, int p, int c) {
+            this.t = t;
+            this.p = p;
+            this.c = c;
         }
     }
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         System.out.print("Time Unit: ");
         int n = sc.nextInt();
-        Building[] buildings = {
-            new Building("T", 5, 1500),
-            new Building("P", 4, 1000),
-            new Building("C", 10, 2000)
-        };
-        solve(n, buildings);
-    }
-    public static void solve(int n, Building[] b) {
-        long maxProfit = 0;
-        List<String> results = new ArrayList<>();
+        int maxProfit = 0;
+        List<Solution> solutions = new ArrayList<>();
         for (int t = 0; t <= n / 5; t++) {
-            for (int p = 0; p <= (n - t * 5) / 4; p++) {
-                int remaining = n - (t * 5) - (p * 4);
-                int c = remaining / 10;
-                long profit = calculateProfit(n, t, p, c, b);
-                if (profit > maxProfit) {
-                    maxProfit = profit;
-                    results.clear();
-                    results.add(format(t, p, c));
-                } else if (profit == maxProfit && profit > 0) {
-                    results.add(format(t, p, c));
+            for (int p = 0; p <= n / 4; p++) {
+                for (int c = 0; c <= n / 10; c++) {
+                    int totalTime = (t * 5) + (p * 4) + (c * 10);
+                    if (totalTime < n) {
+                        int currentTime = 0;
+                        int profit = 0;
+                        for (int i = 0; i < t; i++) {
+                            currentTime += 5;
+                            profit += (n - currentTime) * 1500;
+                        }
+                        for (int i = 0; i < p; i++) {
+                            currentTime += 4;
+                            profit += (n - currentTime) * 1000;
+                        }
+                        for (int i = 0; i < c; i++) {
+                            currentTime += 10;
+                            profit += (n - currentTime) * 2000;
+                        }
+                        if (profit > maxProfit) {
+                            maxProfit = profit;
+                            solutions.clear();
+                            solutions.add(new Solution(t, p, c));
+                        }
+                        else if (profit == maxProfit) {
+                            solutions.add(new Solution(t, p, c));
+                        }
+                    }
                 }
             }
         }
-        System.out.println("Earnings: $" + maxProfit);
+        System.out.println("\nEarnings: $" + maxProfit);
         System.out.println("Solutions:");
-        for (int i = 0; i < results.size(); i++) {
-            System.out.println((i + 1) + ". " + results.get(i));
+        int count = 1;
+        for (Solution s : solutions) {
+            System.out.println(
+                    count + ". T: " + s.t +
+                    " P: " + s.p +
+                    " C: " + s.c
+            );
+            count++;
         }
-    }
-    private static long calculateProfit(int n, int t, int p, int c, Building[] b) {
-        List<Building> order = new ArrayList<>();
-        order.add(b[0]);
-        order.add(b[1]);
-        order.add(b[2]);
-        order.sort((a, d) -> (d.earnings / d.time) - (a.earnings / a.time));
-        Map<String, Integer> count = new HashMap<>();
-        count.put("T", t);
-        count.put("P", p);
-        count.put("C", c);
-        int currentTime = 0;
-        long total = 0;
-        for (Building building : order) {
-            int cnt = count.get(building.name);
-            for (int i = 0; i < cnt; i++) {
-                currentTime += building.time;
-                total += (long) (n - currentTime) * building.earnings;
-            }
-        }
-        return total;
-    }
-    private static String format(int t, int p, int c) {
-        return "T: " + t + " P: " + p + " C: " + c;
+        sc.close();
     }
 }
